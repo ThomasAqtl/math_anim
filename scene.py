@@ -6,9 +6,9 @@ from numpy.core.records import array
 
 f1 = lambda x: np.cos(x)
 
-f2 = lambda x: lambda p: f1(2*np.pi*x/p)
+f2 = lambda p: lambda x: np.cos(2*np.pi*x/p)
 
-f3 = lambda x: lambda p: lambda a: lambda b: 0.5 * f2(x,p)*(b-a) + a
+f3 = lambda a, b: lambda p: lambda x: 0.5 * (np.cos(2*np.pi*x/p) + 1) * (b-a) + a
 
 class scene(m.Scene):
     def construct(self):
@@ -21,8 +21,8 @@ class scene(m.Scene):
 
         # Graph 
         graph = Axes(
-            x_range=np.array([-8, 8, 2]),
-            y_range=np.array([-4, 4, 2]),
+            x_range=np.array([-8, 8, 1]),
+            y_range=np.array([-4, 4, 1]),
             x_length=13,
             y_length=7,
             axis_config={
@@ -39,27 +39,56 @@ class scene(m.Scene):
 
         # function parameters (period, bounds)
         a = DecimalNumber(-1, num_decimal_places=2)
-        b = DecimalNumber(1, num_decimal_places=2)
-        p = DecimalNumber(np.pi, num_decimal_places=2)
+        a_tracker = ValueTracker(-1)
+        b = DecimalNumber(2, num_decimal_places=2)
+        b_tracker = ValueTracker(1)
+        p = DecimalNumber(8, num_decimal_places=2, show_ellipsis=True)
+        p_tracker = ValueTracker(4)
 
         # axis labels
-        axes_label = graph.get_axis_labels(Tex('x', color=BLACK), Tex('y', color=BLACK))
+        axes_label = graph.get_axis_labels(Tex('$x$', color=BLACK), Tex('$y$', color=BLACK))
 
         # curves
-        curve_1 = graph.get_graph(f1, color=BLUE)
-        curve_2 = graph.get_graph(lambda x: np.sin(x), color=GREEN)
+        curve_0  = graph.get_graph(lambda x: f1(x), color=GREEN_B)
+
+        curve_1 = graph.get_graph(f2(p.get_value()), color=BLUE)
+        curve_1.add_updater(
+            lambda period: period.become(
+                graph.get_graph(
+                    f2(p.get_value()),
+                    color=BLUE
+                )
+            )
+        )
+
+        curve_2 = graph.get_graph(f3(a.get_value(), b.get_value())(p.get_value()), color=RED)
+
+        # update functions
+        p.add_updater(lambda period : period.set_value(p_tracker.get_value()))
+        a.add_updater(lambda lower_bound : lower_bound.set_value(a_tracker.get_value()))
+        b.add_updater(lambda upper_bound : upper_bound.set_value(b_tracker.get_value()))
 
         # curves labels
-        curve1_label = graph.get_graph_label(curve_1, label=Tex('$\dfrac{2\pi x}{p}$'), x_val=6.5, direction=UP)
-        curve2_label = graph.get_graph_label(curve_2,label=Tex('sin(x)'), x_val=-8, direction=DOWN)
+        curve1_label = graph.get_graph_label(curve_1, label=Tex('$2\\pi x/$',f'{p.get_value():.2f}'), x_val=8, direction=UP)
+        curve1_label.add_updater(
+            lambda m: m.become(
+                graph.get_graph_label(curve_1, label=Tex('$2\\pi x/$',f'{p.get_value():.2f}'), x_val=8, direction=UP)
+            )
+        )
 
         
         
         #=========== SCENE PLAY (step-by-step) ===========
         # 1. Create graph, curves, labels
+        self.add(p.set_opacity(0))
         self.play(Create(graph), run_time=1.5)
-        self.play(Create(curve_1), Create(curve_2), run_time=1.5)
-        self.play(FadeIn(axes_label), FadeIn(curve1_label), FadeIn(curve2_label))
+        #self.play(Create(curve_0), Create(curve_1), Create(curve_2), run_time=1.5)
+        self.play(Create(curve_1), run_time=1)
+        self.play(FadeIn(axes_label), Create(curve1_label)) 
+        self.wait(1)
+        self.play(p_tracker.animate.set_value(5))
+        self.wait(1)
+        self.play(p_tracker.animate.set_value(1))
         self.wait(2)
 
         # 2. 
