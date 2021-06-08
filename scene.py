@@ -27,6 +27,11 @@ The scene goes through these steps sequencially and plot matching graph.
 # Aim function declaration
 f = lambda a, b: lambda p: lambda x: 0.5 * (np.cos(2*np.pi*x/p) + 1) * (b-a) + a
 
+# Argument values list
+p_list = [5, 1, 2, 0.7]
+a_list = [-2, -4, 1, 0]
+b_list = [1, 8, 4.5, 7]
+
 class scene(m.Scene):
     def construct(self):
         #region =========== SCENE SETTINGS ===========
@@ -127,6 +132,7 @@ class scene(m.Scene):
         # Updaters
         p.add_updater(lambda m : m.set_value(p_tracker.get_value()))
         a.add_updater(lambda m : m.set_value(a_tracker.get_value()))
+        a2.add_updater(lambda m : m.set_value(a_tracker.get_value()))
         b.add_updater(lambda m : m.set_value(b_tracker.get_value()))
 
         curve.add_updater(
@@ -162,16 +168,12 @@ class scene(m.Scene):
         self.wait(2)
 
         #2. Reducing formula to corner and adding matching curve
-        self.play(Transform(func_label_0, empty_label), Create(axes), Create(curve), Create(a), Create(b), Create(p))
+        self.play(Transform(func_label_0, empty_label), Create(axes), Create(curve), Create(a), Create(a2), Create(b), Create(p))
         self.wait(2)
 
-        #2. Change period
-        self.play(p_tracker.animate.set_value(5))
-        self.wait(1)
-        self.play(p_tracker.animate.set_value(1))
-        self.wait(1)
-
-        #3. Update curve 1 -> curve 2
-        self.play(a_tracker.animate.set_value(-2))
-        self.wait(1)
+        for i, j, k in zip(p_list, a_list, b_list):
+            self.play(p_tracker.animate.set_value(i))
+            self.play(a_tracker.animate.set_value(j))
+            self.play(b_tracker.animate.set_value(k))
+            self.wait(2)
         #endregion
