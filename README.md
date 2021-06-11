@@ -1,5 +1,8 @@
 # About this repo
-This repository holds different scripts I made using the open-source library [manim](https://github.com/ManimCommunity/manim). 
+This repository holds different scripts I made using the open-source library [manim](https://github.com/ManimCommunity/manim). Every scripts contains detailed explanation about the scene in triple quote at the beginning.
 
 # Show-off
-This section shows the output of every script in this repo, as gif.
+Output of every script in this repo, as gif.
+
+#### scene.py
+[!alt-test](gif/CosineGraphAnimation1.gif)
