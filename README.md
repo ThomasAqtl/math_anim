@@ -5,4 +5,4 @@ This repository holds different scripts I made using the open-source library [ma
 Output of every script in this repo, as gif.
 
 #### scene.py
-[!alt-test](gif/CosineGraphAnimation1.gif)
+![alt-test](gif/CosineGraphAnimation1.gif)
